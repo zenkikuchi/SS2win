@@ -212,7 +212,7 @@ void Case1_main();//画像を音楽に変える関数
 	/*!----------------------環境変数---------------------*/
 	int smallImageWidth = 10;	//縮小画像の横幅
 	int smallImageHeight = 10;  //縮小画像の高さ
-	bool saveSmallImage = true; //縮小画像を保存するかどうか　trueかfalse
+	bool saveSmallImage = false; //縮小画像を保存するかどうか　trueかfalse
 	/* 1 : 絵画の音化(オルゴール式)*/
 
 	int case1_tempo = 240;				//曲全体のテンポ（BPM）デフォ120　使用していない
@@ -311,7 +311,7 @@ int Setup() {
 	2，3個目の引数に幅を指定（width,height）
 	*/
 	if (myWidth < smallImageWidth || myHeight < smallImageHeight) {
-		printf("指定された画像の横幅もしくは高さが元画像を上回っています。\n");
+		std::cout << "指定された画像の横幅もしくは高さが元画像を上回っています。\n元画像\n 幅 :" << myWidth << "\n 高さ" << myHeight;
 		return 0;
 	}
 	FIBITMAP* sMyImage = FreeImage_Rescale(myImage, smallImageWidth, smallImageHeight);
@@ -322,44 +322,6 @@ int Setup() {
 
 	int sMyWidth = FreeImage_GetWidth(sMyImage);                          // 幅取得
 	int sMyHeight = FreeImage_GetHeight(sMyImage);                        //高さ取得
-
-	/*
-	smallMyimageの200x200pixel版を画像保存用として生成 保存
-	ぼかされるのでこの案は廃棄
-	FIBITMAP* saveMyImage = FreeImage_Rescale(sMyImage, 200, 200);
-	FreeImage_Save(FIF_JPEG, saveMyImage, "test.jpg", JPEG_DEFAULT);
-	*/
-	/*元画像のvector情報の入手*/
-	/*
-	for (int y = 0; y < myHeight; y++) {
-		for (int x = 0; x < myWidth; x++) {
-			//画像から特定座標のピクセルを取得
-			FreeImage_GetPixelColor(myImage, x, y, &myRGBQUAD);
-
-			//座標の番号を取得
-			number = myWidth * y + x + 1;
-
-			myR = (int)myRGBQUAD.rgbRed;
-			myG = (int)myRGBQUAD.rgbGreen;
-			myB = (int)myRGBQUAD.rgbBlue;
-			//HSV値に変換
-			myRGBcol = { (unsigned char)myR,(unsigned char)myG,(unsigned char)myB };
-			RgbToHsv(myRGBcol, myHSVcol);
-			myH = myHSVcol.h;
-			myS = myHSVcol.s;
-			myV = myHSVcol.v;
-			//vectorに代入
-			vecR.push_back(myR);
-			vecG.push_back(myG);
-			vecB.push_back(myB);
-			vecH.push_back(myH);
-			vecS.push_back(myS);
-			vecV.push_back(myV);
-			//printf("%d, R%d, G%d, B%d, H%d, S%d, V%d\n",number,myR,myG,myB,myH,myS,myV);
-			//printf("%d\n",vecR[number-1]);                           //vectorはvenR[0]から始まる
-		}
-	}
-	*/
 
 	/*小さい画像のvector情報の入手*/
 	for (int y = 0; y < sMyHeight; y++) {
@@ -398,6 +360,8 @@ void Case1_main() {
 	vector<int> pitch_S = Case1::Pitch(sVecS, case1_highestPitch_S, case1_lowestPitch_S);//Sから作られるの音の高さを決定
 	vector<int> place_S = Case1::Place(sVecS, case1_borderValue_S, case1_during_S);		//Sから作られる音の鳴る場所を決定
 	vector<int> distance_S = Case1::Distance(sVecS, case1_borderValue_S, case1_during_S);  //Sから作られる音の次の音までの長さ
+	/*place_Hについての例外規定*/
+	if (place_H.size() == 0) { std::cout << "条件設定の欠陥により、音楽を生成できませんでした。\n"; return; }
 
 	int sumALL = 0;			//H価とS値の合計　テンポの決定に使用
 	int case1_lasttempo;	//最終的なテンポ
