@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 using namespace std;
 namespace Case1 {
 	vector<int> Pitch(vector<int> smallVector, int highestPitch, int lowestPitch);

@@ -25,6 +25,9 @@ namespace Case1 {
 				latestPlace = i;
 			}
 		}
+		if (latestPlace == 0) {
+			std::cout << "色相値の変化量が少なすぎるため、Hから値を抽出できませんでした\n";
+		}
 		returnDistance.push_back(60);
 
 		return returnPlace;
@@ -43,7 +46,7 @@ namespace Case1 {
 				latestPlace = i;
 			}
 		}
-		returnDistance.push_back(60);
+		returnDistance.push_back(120);
 
 		return returnDistance;
 	}
