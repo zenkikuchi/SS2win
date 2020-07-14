@@ -1,5 +1,5 @@
 #include "Case1.h"
-namespace Case1 {
+namespace case1 {
 	vector<int> Pitch(vector<int> smallVector, int highestPitch, int lowestPitch) {
 		vector<int> returnPitch;
 		int pitchWeight = highestPitch - lowestPitch;

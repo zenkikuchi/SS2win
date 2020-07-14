@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 using namespace std;
-namespace Case1 {
+namespace case1 {
 	vector<int> Pitch(vector<int> smallVector, int highestPitch, int lowestPitch);
 
 	vector<int> Place(vector<int> smallVector, int borderValue, int during);

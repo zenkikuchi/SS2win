@@ -197,7 +197,7 @@ int TestMIDIDataFormat()
 
 int Setup();//画像の読み込みと解析
 
-void Case1_main();//画像を音楽に変える関数
+void Case1();//画像を音楽に変える関数
 
 	/*!---------------システム変数--------------*/
 	char myPath[100];
@@ -210,13 +210,13 @@ void Case1_main();//画像を音楽に変える関数
 		sVecR, sVecG, sVecB, sVecH, sVecS, sVecV;
 	std::string filename;
 	/*!----------------------環境変数---------------------*/
-	int smallImageWidth = 10;	//縮小画像の横幅
-	int smallImageHeight = 10;  //縮小画像の高さ
-	bool saveSmallImage = false; //縮小画像を保存するかどうか　trueかfalse
+	int smallImageWidth = 12;	//縮小画像の横幅
+	int smallImageHeight = 12;  //縮小画像の高さ
+	bool saveSmallImage = true; //縮小画像を保存するかどうか　trueかfalse
 	/* 1 : 絵画の音化(オルゴール式)*/
 
 	int case1_tempo = 240;				//曲全体のテンポ（BPM）デフォ120　使用していない
-	float case1_tempo倍率 = 1.0;		//テンポに掛ける倍率　1で等倍
+	float case1_tempo倍率 = 1.5;		//テンポに掛ける倍率　1で等倍
 
 	int case1_lowestPitch_H = 60;		//一番低い音　0~127まで
 	int case1_highestPitch_H = 72;		//一番高い音　0~127まで
@@ -251,7 +251,7 @@ int main()
 		switch (selectNumber)
 		{
 		case 1:
-			Case1_main();
+			Case1();
 			break;
 		default:
 			printf("正しい選択肢が入力されませんでした。\n");
@@ -352,27 +352,27 @@ int Setup() {
 	return 1;
 }
 
-void Case1_main() {
-	vector<int> pitch_H = Case1::Pitch(sVecH, case1_highestPitch_H, case1_lowestPitch_H); //Hから作られるの音の高さを決定
-	vector<int> place_H = Case1::Place(sVecH, case1_borderValue_H, case1_during_H);		//Hから作られるの音の鳴る場所を決定
-	vector<int> distance_H = Case1::Distance(sVecH, case1_borderValue_H, case1_during_H);  //Hから作られる音の次の音までの長さ
+void Case1() {
+	vector<int> pitch_H = case1::Pitch(sVecH, case1_highestPitch_H, case1_lowestPitch_H); //Hから作られるの音の高さを決定
+	vector<int> place_H = case1::Place(sVecH, case1_borderValue_H, case1_during_H);		//Hから作られるの音の鳴る場所を決定
+	vector<int> distance_H = case1::Distance(sVecH, case1_borderValue_H, case1_during_H);  //Hから作られる音の次の音までの長さ
 
-	vector<int> pitch_S = Case1::Pitch(sVecS, case1_highestPitch_S, case1_lowestPitch_S);//Sから作られるの音の高さを決定
-	vector<int> place_S = Case1::Place(sVecS, case1_borderValue_S, case1_during_S);		//Sから作られる音の鳴る場所を決定
-	vector<int> distance_S = Case1::Distance(sVecS, case1_borderValue_S, case1_during_S);  //Sから作られる音の次の音までの長さ
+	vector<int> pitch_S = case1::Pitch(sVecS, case1_highestPitch_S, case1_lowestPitch_S);//Sから作られるの音の高さを決定
+	vector<int> place_S = case1::Place(sVecS, case1_borderValue_S, case1_during_S);		//Sから作られる音の鳴る場所を決定
+	vector<int> distance_S = case1::Distance(sVecS, case1_borderValue_S, case1_during_S);  //Sから作られる音の次の音までの長さ
 	/*place_Hについての例外規定*/
 	if (place_H.size() == 0) { std::cout << "条件設定の欠陥により、音楽を生成できませんでした。\n"; return; }
 
 	int sumALL = 0;			//H価とS値の合計　テンポの決定に使用
 	int case1_lasttempo;	//最終的なテンポ
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < sVecH.size(); i++)
 	{
 		sumALL += sVecH[i];
 		sumALL += sVecS[i];
 	}
 
-	sumALL = sumALL / 200;
+	sumALL = sumALL / (sVecH.size()*2);
 
 	case1_lasttempo = (sumALL * 180 / 255 + 60) * case1_tempo倍率;
 	printf("テンポは%dです\n", case1_lasttempo);
@@ -409,10 +409,12 @@ void Case1_main() {
 
 	/*イベントを挿入*/
 	MIDITrack_InsertTrackName(pMIDITrack1, 0, L"H値トラック");
-	MIDITrack_InsertProgramChange(pMIDITrack1, 0, 0, 24); /*ナイロンギター*/
+	MIDITrack_InsertProgramChange(pMIDITrack1, 0, 0, 1); /*ナイロンギター*/
 	for (unsigned int i = 0; i < place_H.size(); i++) {
 		/* ノートイベントを挿入            Time  ch  key  vel  dur */
 		MIDITrack_InsertNote(pMIDITrack1, place_H[i], 0, pitch_H[i], 127, distance_H[i + 1]);
+		//MIDITrack_InsertNote(pMIDITrack1, place_H[i], 0, pitch_H[i]+7, 127, distance_H[i + 1]);
+		//MIDITrack_InsertNote(pMIDITrack1, place_H[i], 0, pitch_H[i]+12, 127, distance_H[i + 1]);
 	}
 
 	/* エンドオブトラックイベントを挿入 */
@@ -422,7 +424,7 @@ void Case1_main() {
 	/*!トラック2 ( Sの値 ) */
 	/*3つ目のトラックへのポインタを取得*/
 	pMIDITrack2 = MIDITrack_GetNextTrack(pMIDITrack1);
-	MIDITrack_InsertProgramChange(pMIDITrack2, 0, 1, 24); /*ナイロンギター*/
+	MIDITrack_InsertProgramChange(pMIDITrack2, 0, 1, 1); /*ナイロンギター*/
 
 	/*イベントを挿入*/
 	MIDITrack_InsertTrackName(pMIDITrack2, 0, L"S値トラック");
