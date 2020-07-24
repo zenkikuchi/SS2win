@@ -126,7 +126,7 @@ void TestFreeImage()
 			throw std::runtime_error("Save failed");
 		}
 	}
-	catch (std::exception & e) {
+	catch (std::exception& e) {
 		std::cout << "exception!\n" << e.what() << std::endl;
 	}
 }
@@ -197,41 +197,85 @@ int TestMIDIDataFormat()
 
 int Setup();//画像の読み込みと解析
 
+void MovePitch(vector<int> inputVec);
+
 void Case1();//画像を音楽に変える関数
 
+
 	/*!---------------システム変数--------------*/
-	char myPath[100];
-	RGBQUAD myRGBQUAD;
-	RgbColor myRGBcol;
-	HsvColor myHSVcol;
-	int number, myR, myG, myB, myH, myS, myV,
-		sNumber, sMyR, sMyG, sMyB, sMyH, sMyS, sMyV;
-	vector<int> vecR, vecG, vecB, vecH, vecS, vecV,
-		sVecR, sVecG, sVecB, sVecH, sVecS, sVecV;
-	std::string filename;
-	/*!----------------------環境変数---------------------*/
-	int smallImageWidth = 12;	//縮小画像の横幅
-	int smallImageHeight = 12;  //縮小画像の高さ
-	bool saveSmallImage = true; //縮小画像を保存するかどうか　trueかfalse
-	/* 1 : 絵画の音化(オルゴール式)*/
+char myPath[100];
+RGBQUAD myRGBQUAD;
+RgbColor myRGBcol;
+HsvColor myHSVcol;
+int number, myR, myG, myB, myH, myS, myV,
+sNumber, sMyR, sMyG, sMyB, sMyH, sMyS, sMyV;
+vector<int> vecR, vecG, vecB, vecH, vecS, vecV,
+sVecR, sVecG, sVecB, sVecH, sVecS, sVecV;
+std::string filename;
+/*!----------------------環境変数---------------------*/
+int smallImageWidth = 10;	//縮小画像の横幅
+int smallImageHeight = 10;  //縮小画像の高さ
+bool saveSmallImage = true; //縮小画像を保存するかどうか　trueかfalse
+/* 1 : 絵画の音化(オルゴール式)*/
 
-	int case1_tempo = 240;				//曲全体のテンポ（BPM）デフォ120　使用していない
-	float case1_tempo倍率 = 1.5;		//テンポに掛ける倍率　1で等倍
+int case1_tempo = 240;				//曲全体のテンポ（BPM）デフォ120　使用していない
+float case1_tempo倍率 = 1.5;		//テンポに掛ける倍率　1で等倍
 
-	int case1_lowestPitch_H = 60;		//一番低い音　0~127まで
-	int case1_highestPitch_H = 72;		//一番高い音　0~127まで
-	int case1_borderValue_H = 15;       //境界と認識する値の幅　0~255
-	int case1_during_H = 120;			// 次の音までの長さ　120で100％　60で50％の長さ　120を超えると次の音と重なる
+int case1_lowestPitch_H = 60;		//一番低い音　0~127まで
+int case1_highestPitch_H = 84;		//一番高い音　0~127まで
+int case1_borderValue_H = 15;       //境界と認識する値の幅　0~255
+int case1_during_H = 120;			// 次の音までの長さ　120で100％　60で50％の長さ　120を超えると次の音と重なる
 
-	int case1_lowestPitch_S = 48;		//一番低い音　0~127まで
-	int case1_highestPitch_S = 72;		//一番高い音　0~127まで
-	int case1_borderValue_S = 15;       //境界と認識する値の幅　0~255
-	int case1_during_S = 120;			// 次の音までの長さ　120で100％　60で50％の長さ　120を超えると次の音と重なる
-	/*!----------------------補足情報---------------------*/
-	/*
-	WIN!
-	MIDIデータのピッチは普通のドが 60 (C4)で0～127まで
-	*/
+int case1_lowestPitch_S = 48;		//一番低い音　0~127まで
+int case1_highestPitch_S = 72;		//一番高い音　0~127まで
+int case1_borderValue_S = 15;       //境界と認識する値の幅　0~255
+int case1_during_S = 120;			// 次の音までの長さ　120で100％　60で50％の長さ　120を超えると次の音と重なる
+/*!----------------------補足情報---------------------*/
+/*
+WIN!
+MIDIデータのピッチは普通のドが 60 (C4)で0～127まで
+*/
+vector<int> sVecSsnake = { 0,1,2,3,4,5,6,7,8,9,
+						19,18,17,16,15,14,13,12,11,10,
+						20,21,22,23,24,25,26,27,28,29,
+						39,38,37,36,35,34,33,32,31,30,
+						40,41,42,43,44,45,46,47,48,49,
+						59,58,57,56,55,54,53,52,51,50,
+						60,61,62,63,64,65,66,67,68,69,
+						79,78,77,76,75,74,73,72,71,70,
+						80,81,82,83,84,85,86,87,88,89,
+						99,98,97,96,95,94,93,92,91,90
+};
+vector<int> sVecHsnake = { 0,1,2,3,4,5,6,7,8,9,
+						19,18,17,16,15,14,13,12,11,10,
+						20,21,22,23,24,25,26,27,28,29,
+						39,38,37,36,35,34,33,32,31,30,
+						40,41,42,43,44,45,46,47,48,49,
+						59,58,57,56,55,54,53,52,51,50,
+						60,61,62,63,64,65,66,67,68,69,
+						79,78,77,76,75,74,73,72,71,70,
+						80,81,82,83,84,85,86,87,88,89,
+						99,98,97,96,95,94,93,92,91,90
+};
+vector<int> sVecsnake = { 0,1,2,3,4,5,6,7,8,9,
+						19,18,17,16,15,14,13,12,11,10,
+						20,21,22,23,24,25,26,27,28,29,
+						39,38,37,36,35,34,33,32,31,30,
+						40,41,42,43,44,45,46,47,48,49,
+						59,58,57,56,55,54,53,52,51,50,
+						60,61,62,63,64,65,66,67,68,69,
+						79,78,77,76,75,74,73,72,71,70,
+						80,81,82,83,84,85,86,87,88,89,
+						99,98,97,96,95,94,93,92,91,90
+};
+void Debug() {
+	for (int i = 0; i < 100; i++) {
+		sVecHsnake[i] = sVecH[sVecsnake[i]];
+		sVecSsnake[i] = sVecS[sVecsnake[i]];
+	}
+	sVecH = sVecHsnake;
+	sVecS = sVecSsnake;
+}
 
 int main()
 {
@@ -251,6 +295,7 @@ int main()
 		switch (selectNumber)
 		{
 		case 1:
+			Debug();
 			Case1();
 			break;
 		default:
@@ -353,6 +398,7 @@ int Setup() {
 }
 
 void Case1() {
+	MovePitch(sVecV);
 	vector<int> pitch_H = case1::Pitch(sVecH, case1_highestPitch_H, case1_lowestPitch_H); //Hから作られるの音の高さを決定
 	vector<int> place_H = case1::Place(sVecH, case1_borderValue_H, case1_during_H);		//Hから作られるの音の鳴る場所を決定
 	vector<int> distance_H = case1::Distance(sVecH, case1_borderValue_H, case1_during_H);  //Hから作られる音の次の音までの長さ
@@ -372,7 +418,7 @@ void Case1() {
 		sumALL += sVecS[i];
 	}
 
-	sumALL = sumALL / (sVecH.size()*2);
+	sumALL = sumALL / (sVecH.size() * 2);
 
 	case1_lasttempo = (sumALL * 180 / 255 + 60) * case1_tempo倍率;
 	printf("テンポは%dです\n", case1_lasttempo);
@@ -445,7 +491,7 @@ void Case1() {
 	MIDITrack_InsertTrackName(pMIDITrack3, 0, L"ドラムトラック");
 	for (int i = 0; i * 120 < place_H[place_H.size() - 1] || i * 120 < place_S[place_S.size() - 1]; i++) {
 		/* ノートイベントを挿入            Time  ch  key  vel  dur */
-		MIDITrack_InsertNote(pMIDITrack3, i * 120, 9, 35, 127,240);/*35番　アコースティックバスドラム*/
+		MIDITrack_InsertNote(pMIDITrack3, i * 120, 9, 35, 127, 240);/*35番　アコースティックバスドラム*/
 	}
 
 	/* エンドオブトラックイベントを挿入 */
@@ -466,4 +512,26 @@ void Case1() {
 	/* MIDIデータをメモリ上から削除 */
 	MIDIData_Delete(pMIDIData);
 	pMIDIData = NULL;
+}
+
+void MovePitch(vector<int> inputVec) {
+	int sumAll = 0;
+	for (int i = 0; i < inputVec.size(); i++)
+	{
+		sumAll += inputVec[i];
+	}
+	sumAll = sumAll / inputVec.size();
+	std::cout << "明度のの平均値は" << sumAll << "です\n";
+	if(sumAll >= 132){
+		case1_highestPitch_H += (sumAll - 132) / 4.8;
+		case1_lowestPitch_H += (sumAll - 132) / 4.8;
+		case1_highestPitch_S += (sumAll - 132) / 4.8;
+		case1_lowestPitch_S += (sumAll - 132) / 4.8;
+	}
+	else {
+		case1_highestPitch_H -= (132 - sumAll) / 4.1;
+		case1_lowestPitch_H -= (132 - sumAll) / 4.1;
+		case1_highestPitch_S -= (132 - sumAll) / 4.1;
+		case1_lowestPitch_S -= (132 - sumAll) / 4.1;
+	}
 }
